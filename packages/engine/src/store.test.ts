@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
-import { mkdtemp, rm, readdir } from 'node:fs/promises'
+import { mkdtemp, rm, readdir, mkdir } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { dataDir, readJson, writeJson, writeRuntime, readRuntime } from './store.js'
@@ -32,6 +32,30 @@ describe('magasin de fichiers', () => {
 
   it('ne laisse aucun fichier temporaire derriere lui', async () => {
     await writeJson('projects.json', [{ id: 'a' }])
+    const restes = (await readdir(maison)).filter((f) => f.includes('.tmp'))
+    expect(restes).toEqual([])
+  })
+
+  it('nettoie le fichier temporaire en cas d echec d ecriture ou renommage', async () => {
+    // Intention : si rename() echoue (par exemple, la cible est un repertoire),
+    // le fichier temporaire doit etre supprime et l'erreur doit etre relancee.
+    // On cree un repertoire a la place du fichier cible pour forcer l'echec.
+    const nomFichier = 'projects.json'
+    const cheminCible = join(maison, nomFichier)
+    await mkdir(cheminCible, { recursive: true })
+
+    // Tenter d'ecrire doit echouer (EISDIR: cannot rename file to directory)
+    // et doit nettoyer le fichier temporaire.
+    let erreurCapturee = false
+    try {
+      await writeJson(nomFichier, [{ id: 'a' }])
+    } catch (e) {
+      erreurCapturee = true
+    }
+
+    expect(erreurCapturee).toBe(true)
+
+    // Verifier que aucun fichier temporaire ne reste.
     const restes = (await readdir(maison)).filter((f) => f.includes('.tmp'))
     expect(restes).toEqual([])
   })
