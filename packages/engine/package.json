@@ -2,5 +2,8 @@
   "name": "@codecity/engine",
   "private": true,
   "type": "module",
-  "main": "src/main.ts"
+  "main": "src/main.ts",
+  "dependencies": {
+    "@anthropic-ai/claude-agent-sdk": "^0.3.274"
+  }
 }
