@@ -1,0 +1,18 @@
+node_modules/
+dist/
+build/
+out/
+*.vsix
+
+# Journaux et etats locaux
+*.log
+.codecity/
+coverage/
+
+# Systeme
+.DS_Store
+Thumbs.db
+
+# Editeurs
+.vscode/settings.json
+.idea/
