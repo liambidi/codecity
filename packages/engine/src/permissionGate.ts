@@ -25,7 +25,7 @@ type Attente = {
   resoudre: (reponse: PermissionAnswer) => void
 }
 
-/** Resume court d'une demande, pour la bulle affichee au-dessus du personnage. */
+/** Resume court d'une demande, pour l'affichage synthetique dans l'interface. */
 function resumer(toolName: string, input: Record<string, unknown>): string {
   if (typeof input.command === 'string') return `${toolName} : ${input.command}`
   if (typeof input.file_path === 'string') return `${toolName} : ${input.file_path}`
