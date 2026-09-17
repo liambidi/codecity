@@ -1,0 +1,18 @@
+/* Feuille volontairement minimale. Le soin visuel arrive au jalon 4. */
+:root { color-scheme: light dark; --fond: #12131a; --texte: #e8e8ef; --accent: #7aa2f7; }
+body { margin: 0; background: var(--fond); color: var(--texte);
+  font: 15px/1.5 system-ui, sans-serif; }
+.ecran { max-width: 60rem; margin: 0 auto; padding: 1rem 16px; }
+header { display: flex; justify-content: space-between; align-items: center; }
+.lancement { display: grid; gap: .5rem; margin: 1rem 0; }
+textarea { min-height: 5rem; font: inherit; padding: .5rem; }
+button { font: inherit; padding: .4rem .8rem; cursor: pointer; }
+button.danger { background: #b4293b; color: white; border: 0; }
+.permission { border: 2px solid var(--accent); padding: 1rem; margin: 1rem 0; }
+.permission .resume { font-family: ui-monospace, monospace; font-size: 1.05rem; }
+.erreur { color: #ff8f8f; }
+.journal ol { list-style: none; padding: 0; }
+.journal li { padding: .25rem 0; border-bottom: 1px solid #ffffff14; }
+.journal strong { color: var(--accent); margin-right: .5rem; }
+pre { overflow-x: auto; background: #00000040; padding: .5rem; }
+@media (max-width: 40rem) { .ecran { padding: 1rem 16px; } }

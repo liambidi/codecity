@@ -8,7 +8,9 @@
   },
   "scripts": {
     "test": "vitest run",
-    "test:smoke": "vitest run --config vitest.smoke.config.ts"
+    "test:smoke": "vitest run --config vitest.smoke.config.ts",
+    "dev": "tsx packages/engine/src/main.ts",
+    "build": "npm run build --workspace @codecity/ui && tsc -p packages/engine"
   },
   "keywords": [],
   "author": "",
