@@ -1,0 +1,28 @@
+{
+  "name": "codecity",
+  "version": "1.0.0",
+  "description": "Piloter Claude Code, Codex et d'autres agents CLI depuis une interface visuelle, ou chaque agent est un personnage et chaque tache restante une quete.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "private": "true",
+  "workspaces": [
+    "packages/engine",
+    "packages/ui",
+    "packages/extension"
+  ],
+  "devDependencies": {
+    "@types/node": "^22.20.3",
+    "tsx": "^4.23.13",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.1"
+  }
+}
