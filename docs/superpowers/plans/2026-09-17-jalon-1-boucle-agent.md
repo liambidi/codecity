@@ -2040,6 +2040,17 @@ export async function startServer(opts: { root: string; port: number }) {
 
   const ws = new WebSocketServer({ server: http, path: '/flux' })
 
+  // Correction du 2026-09-17, apres une revue de securite automatique sur la tache
+  // de mise en oeuvre : le code ci-dessus, tel quel, n'a aucune verification d'origine.
+  // N'importe quelle page web ouverte dans le navigateur de Liam pourrait ouvrir cette
+  // connexion et repondre "allow" a une demande de permission a sa place, contournant
+  // le guichet de permissions qui est le mecanisme de securite central du projet.
+  // Le constructeur reel doit passer `verifyClient` pour rejeter toute connexion dont
+  // l'en-tete `Origin` ne correspond pas exactement a `http://127.0.0.1:${opts.port}`,
+  // et la route `POST /arret` plus bas doit faire la meme verification sur
+  // `requete.headers.origin` (403 si present et different, laisser passer si absent,
+  // pour les appels directs en ligne de commande ou depuis l'extension VS Code).
+
   ws.on('connection', (client) => {
     clients.add(client)
     client.on('close', () => clients.delete(client))
