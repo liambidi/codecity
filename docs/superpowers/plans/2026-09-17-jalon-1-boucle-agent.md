@@ -186,7 +186,13 @@ git commit -m "Etape zero : abonnement constate et fixtures reelles enregistrees
 ## Tâche 1 : squelette de l'espace de travail et contrat d'événements
 
 **Fichiers :**
-- Créer : `package.json`, `tsconfig.base.json`, `vitest.config.ts`
+- Créer : `package.json`, `tsconfig.base.json`
+
+> Correction du 2026-09-17, apres la revue de la tache : `vitest.config.ts` n'est pas
+> cree ici. Son contenu reel, avec l'exclusion des tests `.smoke`, n'apparait qu'a la
+> Tache 6. Le lister ici etait une erreur d'ecriture du plan, reperee par le reviewer
+> de tache ; les tests de cette tache s'executent directement sur un fichier cible et
+> n'ont pas besoin d'une config racine.
 - Créer : `packages/engine/package.json`, `packages/engine/tsconfig.json`
 - Créer : `packages/engine/src/events.ts`
 - Test : `packages/engine/src/events.test.ts`
