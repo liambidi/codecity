@@ -66,4 +66,46 @@ describe('serveur', () => {
     expect(info?.port).toBe(serveur.port)
     expect(info?.pid).toBe(process.pid)
   })
+
+  it('refuse une connexion websocket dont l origine ne correspond pas au moteur', async () => {
+    await new Promise<void>((resoudre, rejeter) => {
+      const prise = new WebSocket(`ws://127.0.0.1:${serveur.port}/flux`, {
+        headers: { Origin: 'http://evil.example' },
+      })
+      const minuteur = setTimeout(() => {
+        prise.terminate()
+        rejeter(new Error('la connexion n a pas ete refusee a temps'))
+      }, 5000)
+      prise.on('unexpected-response', (_requete, reponse) => {
+        clearTimeout(minuteur)
+        expect(reponse.statusCode).toBe(401)
+        resoudre()
+      })
+      prise.on('open', () => {
+        clearTimeout(minuteur)
+        prise.close()
+        rejeter(new Error('la connexion a ete acceptee alors qu elle aurait du etre refusee'))
+      })
+      prise.on('error', () => {
+        // Selon la plateforme, un handshake refuse peut aussi remonter par 'error'
+        // plutot que par 'unexpected-response'. Les deux comptent comme un refus.
+        clearTimeout(minuteur)
+        resoudre()
+      })
+    })
+  })
+
+  it('renvoie 403 sur POST /arret si l origine ne correspond pas au moteur', async () => {
+    const reponse = await fetch(`http://127.0.0.1:${serveur.port}/arret`, {
+      method: 'POST',
+      headers: { origin: 'http://evil.example' },
+    })
+    expect(reponse.status).toBe(403)
+  })
+
+  it('accepte POST /arret sans en tete Origin, comme un appel CLI ou l extension', async () => {
+    const reponse = await fetch(`http://127.0.0.1:${serveur.port}/arret`, { method: 'POST' })
+    expect(reponse.status).toBe(200)
+    expect((await reponse.json()).ok).toBe(true)
+  })
 })

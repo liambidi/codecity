@@ -29,6 +29,17 @@ export async function startServer(opts: { root: string; port: number }) {
   let session: AgentSession | null = null
   let sessionProjet: Project | null = null
   const clients = new Set<WebSocket>()
+  // Connu des l'appel, mais remplace par le port reellement obtenu une fois
+  // le serveur en ecoute (utile en test, ou le port demande est 0).
+  let port = opts.port
+
+  // Un navigateur ne permet pas a une page de mentir sur son Origin. On s'appuie
+  // dessus pour distinguer l'interface de codecity d'une page tierce qui tenterait
+  // de parler au moteur en arriere-plan. Un appel sans Origin, typiquement la ligne
+  // de commande ou l'extension VS Code, reste autorise : ce n'est pas un navigateur.
+  const origineAttendue = () => `http://127.0.0.1:${port}`
+  const origineValide = (origine: string | undefined) =>
+    !origine || origine === origineAttendue()
 
   const diffuser = (message: ServerMessage) => {
     const charge = JSON.stringify(message)
@@ -46,6 +57,14 @@ export async function startServer(opts: { root: string; port: number }) {
     // Arret par HTTP, et pas seulement par WebSocket : l'extension VS Code
     // tourne sur un Node dont la WebSocket globale n'est pas garantie.
     if (requete.url === '/arret' && requete.method === 'POST') {
+      // Route privilegiee : une page web tierce ne doit pas pouvoir l'appeler
+      // en CSRF depuis le navigateur de Liam. Meme verification d'origine que
+      // pour le WebSocket, avec la meme exception pour les appels sans Origin.
+      if (!origineValide(requete.headers.origin)) {
+        reponse.writeHead(403, { 'content-type': 'application/json' })
+        reponse.end(JSON.stringify({ ok: false }))
+        return
+      }
       reponse.writeHead(200, { 'content-type': 'application/json' })
       reponse.end(JSON.stringify({ ok: true }))
       void session?.interrupt().finally(() => setTimeout(() => process.exit(0), 100))
@@ -68,7 +87,14 @@ export async function startServer(opts: { root: string; port: number }) {
     }
   })
 
-  const ws = new WebSocketServer({ server: http, path: '/flux' })
+  const ws = new WebSocketServer({
+    server: http,
+    path: '/flux',
+    // Meme garde que sur /arret : seule une origine absente ou egale a celle
+    // du moteur peut ouvrir le flux. Ferme la porte au detournement inter-origine
+    // qui contournerait le guichet de permissions depuis une page tierce.
+    verifyClient: (info: { origin: string }) => origineValide(info.origin),
+  })
 
   ws.on('connection', (client) => {
     clients.add(client)
@@ -137,7 +163,7 @@ export async function startServer(opts: { root: string; port: number }) {
     })
   })
 
-  const port = await new Promise<number>((resoudre) => {
+  port = await new Promise<number>((resoudre) => {
     http.listen(opts.port, '127.0.0.1', () => {
       const adresse = http.address()
       resoudre(typeof adresse === 'object' && adresse ? adresse.port : opts.port)
