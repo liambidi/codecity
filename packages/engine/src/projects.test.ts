@@ -63,6 +63,14 @@ describe('registre de projets', () => {
     expect((await scanProjects(racine)).map((p) => p.name)).toEqual(['abeille', 'zebre'])
   })
 
+  it('classifie un depot git sans marqueur de langage comme type autre', async () => {
+    const chemin = await creerDossier('depot-autre', [])
+    await mkdir(join(chemin, '.git'), { recursive: true })
+    const projets = await scanProjects(racine)
+    expect(projets).toHaveLength(1)
+    expect(projets[0]).toMatchObject({ kind: 'autre', hasGit: true, name: 'depot-autre' })
+  })
+
   it('rend une liste vide plutot que de jeter si la racine n existe pas', async () => {
     expect(await scanProjects(join(racine, 'inexistant'))).toEqual([])
   })
