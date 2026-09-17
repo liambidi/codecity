@@ -1030,6 +1030,17 @@ export function translateClaudeMessage(message: unknown, sessionId: string): Cit
 }
 ```
 
+> Correction du 2026-09-17, decidee par Liam apres la revue de la tache : le code
+> ci-dessus, applique tel quel a la vraie fixture de la tache 0, donne 73% de messages
+> non traduits (19 lignes de plomberie sur 26), tres au-dessus du seuil de 20% exige
+> plus bas. Le comportement retenu est different de celui ecrit ci-dessus : les
+> messages `system`, `user` et les evenements de flux (limites de debit, etc.) sont
+> desormais connus et ne comptent PAS dans la dette. Le compteur ne mesure plus que
+> l'imprevu, un type de message que le traducteur ne reconnait pas du tout, ce qui est
+> le seul cas ou un terminal de repli aurait un sens. Le code de reference plus haut
+> garde sa valeur pedagogique pour le reste de la structure de la fonction, mais pas
+> pour cette derniere branche.
+
 - [ ] **Étape 4 : lancer le test pour le voir passer**
 
 ```bash
